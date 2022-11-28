@@ -1,0 +1,61 @@
+# this is the pipeline script for CI[CD deployment of app to the EKS cluster.
+
+pipeline {
+ agent any
+ environment {
+     AWS_ACCESS_KEY_ID = 
+     AWS_SECRET_KEY = IDFORAWS
+}
+ 
+ stages {
+   stage('prepare workspace') {
+     steps {
+      git brancg : 'master' , 
+      sh 'terraform init'
+      }
+   }
+   stage('prepare workspace') {
+     steps {
+     
+      sh 'terraform apply -auto-approve'
+      }
+   }
+    stage('prepare workspace') {
+     steps {
+     
+      sh 'terraform apply -auto-approve'
+      sh 'terraform out kubeconfig > ./kubeconfig'
+      sh 'export KUBECONFIG= ./kubeconfig'
+      }
+   }
+   stage('add workers nodes')
+     steps {
+      sh 'kubectl apply -f <workernodes.yaml>
+      sh 'sleep 30'
+      }
+   }
+   stage('deploy 2 tier application')
+     steps {
+      sh 'kubectl apply -f <my2tierapp.yml> --KUBECONFIG= ./kubeconfig' 
+      
+      }
+   }
+   stage('Run terraform destroy')
+     steps {
+       input 'Run terraform destroy'      
+       }
+   }
+   stage('TERRAFORM DESTROY')
+     steps {
+     
+      sh 'kubectl delete -f <my2tierapp.yml> --KUBECONFIG= ./kubeconfig' 
+      sh 'sleep 60'
+      sh 'terraform destroy -force'
+      }
+    }
+  }  
+}     
+     
+     
+     
+     
